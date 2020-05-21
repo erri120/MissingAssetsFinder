@@ -16,11 +16,11 @@ namespace MissingAssetsFinder
                     .DisposeWith(disposable);
                 this.OneWayBind(ViewModel, x => x.SelectedDataPath, x => x.DataFolderTextBox.Text)
                     .DisposeWith(disposable);
-                this.OneWayBind(ViewModel, x => x.SelectedPluginPath, x => x.PluginTextBox.Text)
+                this.OneWayBind(ViewModel, x => x.SelectedPlugins, x => x.PluginsListBox.ItemsSource)
                     .DisposeWith(disposable);
                 this.BindCommand(ViewModel, x => x.SelectDataFolder, x => x.SelectDataFolderButton)
                     .DisposeWith(disposable);
-                this.BindCommand(ViewModel, x => x.SelectPlugin, x => x.SelectPluginButton)
+                this.BindCommand(ViewModel, x => x.SelectPlugins, x => x.SelectPluginButton)
                     .DisposeWith(disposable);
                 this.BindCommand(ViewModel, x => x.Start, x => x.StartButton)
                     .DisposeWith(disposable);

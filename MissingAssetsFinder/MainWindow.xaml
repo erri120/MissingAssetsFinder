@@ -22,6 +22,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0">
                 <TextBlock HorizontalAlignment="Center" Style="{DynamicResource MaterialDesignHeadline4TextBlock}">Missing Assets Finder</TextBlock>
@@ -31,16 +33,25 @@
                 <Label>Data Folder:</Label>
                 <TextBox x:Name="DataFolderTextBox" IsReadOnly="True"/>
 
-                <Button x:Name="SelectPluginButton" Margin="0 12 0 12">Select Plugin</Button>
-                <Label>Plugin:</Label>
-                <TextBox x:Name="PluginTextBox" IsReadOnly="True"/>
+                <Button x:Name="SelectPluginButton" Margin="0 12 0 12">Select Plugins</Button>
+                <Label>Selected Plugins:</Label>
+            </StackPanel>
 
+            <ListBox x:Name="PluginsListBox" Grid.Row="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Grid.Row="2">
                 <Button x:Name="StartButton" Margin="0 12 0 12">Start</Button>
 
                 <TextBlock Margin="0 8 0 0">Log:</TextBlock>
             </StackPanel>
 
-            <materialDesign:Card Padding="4" Margin="0 12 0 12" Grid.Row="1">
+            <materialDesign:Card Padding="4" Margin="0 12 0 12" Grid.Row="3">
                 <ListBox x:Name="LogListBox" local:AutoScrollBehavior.ScrollOnNewItem="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>

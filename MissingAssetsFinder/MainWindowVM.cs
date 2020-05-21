@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -20,12 +21,12 @@ namespace MissingAssetsFinder
 
         [Reactive] public string SelectedDataPath { get; set; } = string.Empty;
 
-        [Reactive] public string SelectedPluginPath { get; set; } = string.Empty;
+        [Reactive] public List<string> SelectedPlugins { get; set; }
 
         [Reactive] public bool IsWorking { get; set; }
 
         public ReactiveCommand<Unit, Unit> SelectDataFolder;
-        public ReactiveCommand<Unit, Unit> SelectPlugin;
+        public ReactiveCommand<Unit, Unit> SelectPlugins;
         public ReactiveCommand<Unit, Unit> Start;
 
         public ObservableCollectionExtended<string> Log { get; } = new ObservableCollectionExtended<string>();
@@ -46,6 +47,8 @@ namespace MissingAssetsFinder
 
             Utils.Log("Finished Logger setup");
 
+            SelectedPlugins = new List<string>();
+
             SelectDataFolder = ReactiveCommand.Create(() =>
             {
                 var dialog = new CommonOpenFileDialog
@@ -62,13 +65,13 @@ namespace MissingAssetsFinder
                 SelectedDataPath = dialog.FileName;
             }, this.WhenAny(x => x.IsWorking).Select(x => !x));
 
-            SelectPlugin = ReactiveCommand.Create(() =>
+            SelectPlugins = ReactiveCommand.Create(() =>
             {
                 var dialog = new CommonOpenFileDialog
                 {
-                    Title = "Select Plugin",
+                    Title = "Select Plugins",
                     IsFolderPicker = false,
-                    Multiselect = false,
+                    Multiselect = true,
                     AddToMostRecentlyUsedList = false,
                     EnsureFileExists = true,
                     EnsurePathExists = true,
@@ -77,14 +80,14 @@ namespace MissingAssetsFinder
                 dialog.Filters.Add(new CommonFileDialogFilter("Plugin", ".esp"));
 
                 if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
-                Utils.Log($"Selected: {dialog.FileName}");
-                SelectedPluginPath = dialog.FileName;
+                Utils.Log($"Selected {dialog.FileNames.Count()} files");
+                SelectedPlugins = dialog.FileNames.ToList();
             }, this.WhenAny(x => x.IsWorking).Select(x => !x));
 
             Start = ReactiveCommand.CreateFromTask(FindMissingAssets,
                 this.WhenAny(x => x.IsWorking).CombineLatest(
                     this.WhenAny(x => x.SelectedDataPath).Select(x => x.IsEmpty()),
-                    this.WhenAny(x => x.SelectedPluginPath).Select(x => x.IsEmpty()),
+                    this.WhenAny(x => x.SelectedPlugins).Select(x => x.All(y => y.IsEmpty())),
                     (isWorking, dataPathEmpty, pluginPathEmpty) => !isWorking && !dataPathEmpty && !pluginPathEmpty));
         }
 
@@ -99,7 +102,10 @@ namespace MissingAssetsFinder
                 await finder.BuildBSACacheAsync();
                 await finder.BuildLooseFileCacheAsync();
 
-                finder.FindMissingAssets(SelectedPluginPath);
+                SelectedPlugins.Do(s =>
+                {
+                    finder.FindMissingAssets(s);
+                });
 
                 return finder.MissingAssets;
             }, token);
