@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Subjects;
 using System.Text;
 using MissingAssetsFinder.Lib.BSA;
 using Mutagen.Bethesda.Skyrim;
@@ -17,8 +18,12 @@ namespace MissingAssetsFinder.Lib
             Windows1252 = Encoding.GetEncoding(1252);
         }
 
+        private static readonly Subject<string> LoggerSubject = new Subject<string>();
+        public static IObservable<string> LogMessages => LoggerSubject;
+
         public static void Log(string s)
         {
+            LoggerSubject.OnNext(s);
             Console.WriteLine(s);
         }
 
