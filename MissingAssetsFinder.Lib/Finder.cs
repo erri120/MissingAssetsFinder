@@ -54,6 +54,7 @@ namespace MissingAssetsFinder.Lib
                 var allowedFiles = reader.Files
                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x.Path)))
                     .Select(x => x.Path)
+                    .Select(x => x.ToLower())
                     .Where(x => !_fileList.Contains(x))
                     .ToList();
 
@@ -75,6 +76,7 @@ namespace MissingAssetsFinder.Lib
                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x)))
                     .Select(x => x.Replace(_dataFolder, ""))
                     .Select(x => x.StartsWith("\\") ? x[1..] : x)
+                    .Select(x => x.ToLower())
                     .Where(x => !_fileList.Contains(x))
                     .ToList());
 
@@ -90,6 +92,7 @@ namespace MissingAssetsFinder.Lib
 
         private void TryAdd(ISkyrimMajorRecordGetter record, string file)
         {
+            file = file.ToLower();
             if (!CanAdd(file))
                 return;
 
