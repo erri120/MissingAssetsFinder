@@ -170,13 +170,18 @@ namespace MissingAssetsFinder.Lib
                 }
             });
 
-            mod.Weapons.Records.Do(r =>
+            mod.Weapons.Records
+                .Where(r => r.Model != null)
+                .Do(r =>
             {
-                if (r.Model == null)
-                    return;
-
-                TryAdd(r, r.Model.File);
+                TryAdd(r, r.Model!.File);
             });
+
+            mod.Statics.Records
+                .Where(r => r.Model != null).Do(r =>
+                {
+                    TryAdd(r, r.Model!.File);
+                });
 
             Utils.Log($"Finished finding missing assets. Found: {MissingAssets.Count} missing assets");
         }
