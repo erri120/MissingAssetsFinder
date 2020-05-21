@@ -7,20 +7,20 @@ using Mutagen.Bethesda.Skyrim;
 
 namespace MissingAssetsFinder.Lib
 {
+    public struct MissingAsset
+    {
+        public ISkyrimMajorRecordGetter Record { get; set; }
+        public List<string> Files { get; set; }
+
+        public MissingAsset(ISkyrimMajorRecordGetter record, string path)
+        {
+            Record = record;
+            Files = new List<string> { path };
+        }
+    }
+
     public class Finder
     {
-        public struct MissingAsset
-        {
-            public ISkyrimMajorRecordGetter Record;
-            public List<string> Files;
-
-            public MissingAsset(ISkyrimMajorRecordGetter record, string path)
-            {
-                Record = record;
-                Files = new List<string>{path};
-            }
-        }
-
         private readonly string _dataFolder;
         private readonly List<string> _fileList;
         public readonly List<MissingAsset> MissingAssets;

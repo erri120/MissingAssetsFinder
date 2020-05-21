@@ -1,0 +1,42 @@
+﻿<Window x:Class="MissingAssetsFinder.ResultsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:MissingAssetsFinder"
+        xmlns:lib="clr-namespace:MissingAssetsFinder.Lib;assembly=MissingAssetsFinder.Lib"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="14"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        mc:Ignorable="d"
+        MinWidth="800"
+        MinHeight="600"
+        Title="Missing Assets Finder" Height="600" Width="800">
+    <Grid>
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Style="{DynamicResource MaterialDesignHeadline5TextBlock}">Results</TextBlock>
+            <TreeView x:Name="ResultTreeView" Grid.Row="1">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type lib:MissingAsset}">
+                        <TreeViewItem Header="{Binding Record.FormKey}" ItemsSource="{Binding Files}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate>
+                                    <TreeViewItem Header="{Binding}"/>
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Grid>
+    </Grid>
+</Window>

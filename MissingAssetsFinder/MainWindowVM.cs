@@ -25,7 +25,7 @@ namespace MissingAssetsFinder
 
         [Reactive] public bool IsWorking { get; set; }
 
-        [Reactive] public List<Finder.MissingAsset> MissingAssets { get; set; }
+        [Reactive] public List<MissingAsset> MissingAssets { get; set; }
 
         public ReactiveCommand<Unit, Unit> SelectDataFolder;
         public ReactiveCommand<Unit, Unit> SelectPlugins;
@@ -51,7 +51,7 @@ namespace MissingAssetsFinder
             Utils.Log("Finished Logger setup");
 
             SelectedPlugins = new List<string>();
-            MissingAssets = new List<Finder.MissingAsset>();
+            MissingAssets = new List<MissingAsset>();
 
             SelectDataFolder = ReactiveCommand.Create(() =>
             {
@@ -96,7 +96,12 @@ namespace MissingAssetsFinder
 
             ViewResults = ReactiveCommand.Create(() =>
                 {
-
+                    var resultsWindow = new ResultsWindow(MissingAssets);
+                    _mainWindow.Closing += (sender, args) =>
+                    {
+                        resultsWindow.Close();
+                    };
+                    resultsWindow.Show();
                 },
                 this.WhenAny(x => x.IsWorking).CombineLatest(this.WhenAny(x => x.MissingAssets).Select(x => x.Count),
                     (isWorking, missingArchivesCount) => !isWorking && missingArchivesCount > 0));

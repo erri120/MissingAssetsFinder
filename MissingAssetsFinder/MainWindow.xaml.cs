@@ -1,4 +1,5 @@
-﻿using System.Reactive.Disposables;
+﻿using System.ComponentModel;
+using System.Reactive.Disposables;
 using ReactiveUI;
 
 namespace MissingAssetsFinder
