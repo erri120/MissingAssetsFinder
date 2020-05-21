@@ -4,6 +4,10 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
+/*
+ * Source: https://github.com/wabbajack-tools/wabbajack/tree/master/Compression.BSA
+ */
+
 namespace MissingAssetsFinder.Lib.BSA
 {
     public enum VersionType : uint

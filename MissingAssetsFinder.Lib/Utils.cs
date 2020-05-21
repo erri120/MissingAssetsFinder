@@ -4,7 +4,6 @@ using System.IO;
 using System.Reactive.Subjects;
 using System.Text;
 using MissingAssetsFinder.Lib.BSA;
-using Mutagen.Bethesda.Skyrim;
 
 namespace MissingAssetsFinder.Lib
 {

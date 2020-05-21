@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/*
+ * Source: https://github.com/wabbajack-tools/wabbajack/tree/master/Compression.BSA
+ */
+
 namespace MissingAssetsFinder.Lib.BSA
 {
     public interface IBSAReader : IAsyncDisposable

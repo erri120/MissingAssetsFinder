@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+
+/*
+ * Source: https://github.com/wabbajack-tools/wabbajack/blob/master/Wabbajack/Util/AutoScrollBehavior.cs
+ */
 
 namespace MissingAssetsFinder
 {
@@ -34,8 +37,7 @@ namespace MissingAssetsFinder
             DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
-            var listBox = d as ListBox;
-            if (listBox == null) return;
+            if (!(d is ListBox listBox)) return;
             bool oldValue = (bool)e.OldValue, newValue = (bool)e.NewValue;
             if (newValue == oldValue) return;
             if (newValue)
@@ -75,8 +77,7 @@ namespace MissingAssetsFinder
         private static void ListBox_Loaded(object sender, RoutedEventArgs e)
         {
             var listBox = (ListBox)sender;
-            var incc = listBox.Items as INotifyCollectionChanged;
-            if (incc == null) return;
+            if (listBox.Items == null) return;
             listBox.Loaded -= ListBox_Loaded;
             Associations[listBox] = new Capture(listBox);
         }
@@ -88,7 +89,7 @@ namespace MissingAssetsFinder
 
             public Capture(ListBox listBox)
             {
-                this._listBox = listBox;
+                _listBox = listBox;
                 _incc = (listBox.ItemsSource as INotifyCollectionChanged)!;
                 if (_incc != null) _incc.CollectionChanged += incc_CollectionChanged;
             }
@@ -101,15 +102,13 @@ namespace MissingAssetsFinder
 
             private void incc_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
             {
-                if (e.Action == NotifyCollectionChangedAction.Add)
+                if (e.Action != NotifyCollectionChangedAction.Add) return;
+                try
                 {
-                    try
-                    {
-                        _listBox.ScrollIntoView(e.NewItems[0]);
-                        _listBox.SelectedItem = e.NewItems[0];
-                    }
-                    catch (ArgumentOutOfRangeException) { }
+                    _listBox.ScrollIntoView(e.NewItems[0]);
+                    _listBox.SelectedItem = e.NewItems[0];
                 }
+                catch (ArgumentOutOfRangeException) { }
             }
         }
     }

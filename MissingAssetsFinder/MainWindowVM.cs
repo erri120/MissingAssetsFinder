@@ -5,7 +5,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using DynamicData;
 using DynamicData.Binding;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -17,7 +16,7 @@ namespace MissingAssetsFinder
 {
     public class MainWindowVM : ViewModel
     {
-        private MainWindow _mainWindow;
+        private readonly MainWindow _mainWindow;
 
         [Reactive] public string SelectedDataPath { get; set; } = string.Empty;
 
@@ -34,7 +33,6 @@ namespace MissingAssetsFinder
         public MainWindowVM(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
-
             Utils.LogMessages
                 .ObserveOn(RxApp.TaskpoolScheduler)
                 .ToObservableChangeSet()
