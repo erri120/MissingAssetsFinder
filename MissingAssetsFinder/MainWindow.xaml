@@ -37,10 +37,10 @@
                 <Label>Selected Plugins:</Label>
             </StackPanel>
 
-            <ListBox x:Name="PluginsListBox" Grid.Row="1">
+            <ListBox x:Name="PluginsListBox" Grid.Row="1" materialDesign:RippleAssist.IsDisabled="True">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" />
+                        <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" materialDesign:RippleAssist.IsDisabled="True"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -52,11 +52,11 @@
                 <TextBlock Margin="0 8 0 0">Log:</TextBlock>
             </StackPanel>
 
-            <materialDesign:Card Padding="4" Margin="0 12 0 12" Grid.Row="3">
-                <ListBox x:Name="LogListBox" local:AutoScrollBehavior.ScrollOnNewItem="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+            <materialDesign:Card Padding="4" Margin="0 12 0 12" Grid.Row="3" materialDesign:RippleAssist.IsDisabled="True">
+                <ListBox x:Name="LogListBox" local:AutoScrollBehavior.ScrollOnNewItem="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" materialDesign:RippleAssist.IsDisabled="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" />
+                            <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" materialDesign:RippleAssist.IsDisabled="True"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

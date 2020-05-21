@@ -24,13 +24,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Style="{DynamicResource MaterialDesignHeadline5TextBlock}">Results</TextBlock>
-            <TreeView x:Name="ResultTreeView" Grid.Row="1">
+            <TreeView x:Name="ResultTreeView" Grid.Row="1" materialDesign:RippleAssist.IsDisabled="True">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type lib:MissingAsset}">
-                        <TreeViewItem Header="{Binding Record.FormKey}" ItemsSource="{Binding Files}">
+                        <TreeViewItem Header="{Binding Record.FormKey}" ItemsSource="{Binding Files}" materialDesign:RippleAssist.IsDisabled="True">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate>
-                                    <TreeViewItem Header="{Binding}"/>
+                                    <TreeViewItem Header="{Binding}" materialDesign:RippleAssist.IsDisabled="True"/>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
