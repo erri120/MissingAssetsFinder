@@ -126,6 +126,7 @@ namespace MissingAssetsFinder
                 return finder.MissingAssets;
             }, token);
 
+            missingAssets.Sort((first, second) => (int)first.Record.FormKey.ID - (int)second.Record.FormKey.ID);
             MissingAssets = missingAssets;
 
             IsWorking = false;
