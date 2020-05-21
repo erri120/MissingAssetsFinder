@@ -24,6 +24,8 @@ namespace MissingAssetsFinder
                     .DisposeWith(disposable);
                 this.BindCommand(ViewModel, x => x.Start, x => x.StartButton)
                     .DisposeWith(disposable);
+                this.BindCommand(ViewModel, x => x.ViewResults, x => x.ViewButton)
+                    .DisposeWith(disposable);
             });
         }
 

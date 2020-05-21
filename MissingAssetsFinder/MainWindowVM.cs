@@ -25,9 +25,12 @@ namespace MissingAssetsFinder
 
         [Reactive] public bool IsWorking { get; set; }
 
+        [Reactive] public List<Finder.MissingAsset> MissingAssets { get; set; }
+
         public ReactiveCommand<Unit, Unit> SelectDataFolder;
         public ReactiveCommand<Unit, Unit> SelectPlugins;
         public ReactiveCommand<Unit, Unit> Start;
+        public ReactiveCommand<Unit, Unit> ViewResults;
 
         public ObservableCollectionExtended<string> Log { get; } = new ObservableCollectionExtended<string>();
 
@@ -48,6 +51,7 @@ namespace MissingAssetsFinder
             Utils.Log("Finished Logger setup");
 
             SelectedPlugins = new List<string>();
+            MissingAssets = new List<Finder.MissingAsset>();
 
             SelectDataFolder = ReactiveCommand.Create(() =>
             {
@@ -89,6 +93,13 @@ namespace MissingAssetsFinder
                     this.WhenAny(x => x.SelectedDataPath).Select(x => x.IsEmpty()),
                     this.WhenAny(x => x.SelectedPlugins).Select(x => x.All(y => y.IsEmpty())),
                     (isWorking, dataPathEmpty, pluginPathEmpty) => !isWorking && !dataPathEmpty && !pluginPathEmpty));
+
+            ViewResults = ReactiveCommand.Create(() =>
+                {
+
+                },
+                this.WhenAny(x => x.IsWorking).CombineLatest(this.WhenAny(x => x.MissingAssets).Select(x => x.Count),
+                    (isWorking, missingArchivesCount) => !isWorking && missingArchivesCount > 0));
         }
 
         public async Task FindMissingAssets(CancellationToken token)
@@ -110,12 +121,14 @@ namespace MissingAssetsFinder
                 return finder.MissingAssets;
             }, token);
 
+            MissingAssets = missingAssets;
+
             IsWorking = false;
 
-            missingAssets.Do(a =>
+            /*missingAssets.Do(a =>
             {
                 Utils.Log($"{a.Record.FormKey} is missing {a.Files.Aggregate((x,y) => $"{x},{y}")}");
-            });
+            });*/
         }
     }
 }

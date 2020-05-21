@@ -47,6 +47,7 @@
 
             <StackPanel Grid.Row="2">
                 <Button x:Name="StartButton" Margin="0 12 0 12">Start</Button>
+                <Button x:Name="ViewButton" Margin="0 12 0 12">View Results</Button>
 
                 <TextBlock Margin="0 8 0 0">Log:</TextBlock>
             </StackPanel>
