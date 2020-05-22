@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MissingAssetsFinder.Lib.BSA;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 
 namespace MissingAssetsFinder.Lib
@@ -183,6 +184,19 @@ namespace MissingAssetsFinder.Lib
                 {
                     TryAdd(r, r.Model!.File);
                 });
+
+            mod.HeadParts.Records.Do(r =>
+            {
+                if(r.Model != null)
+                    TryAdd(r, r.Model.File);
+
+                r.Parts
+                    .Where(p => !p.FileName.IsEmpty())
+                    .Do(p =>
+                {
+                    TryAdd(r, p.FileName!);
+                });
+            });
 
             Utils.Log($"Finished finding missing assets. Found: {MissingAssets.Count} missing assets");
         }
