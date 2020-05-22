@@ -36,6 +36,8 @@ namespace MissingAssetsFinder
 
         public MainWindowVM(MainWindow mainWindow)
         {
+            Mutagen.Bethesda.Warmup.Init();
+
             _mainWindow = mainWindow;
             Utils.LogMessages
                 .ObserveOn(RxApp.TaskpoolScheduler)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,25 +11,25 @@ namespace MissingAssetsFinder.Lib
     public struct MissingAsset
     {
         public ISkyrimMajorRecordGetter Record { get; set; }
-        public List<string> Files { get; set; }
+        public HashSet<string> Files { get; set; }
 
         public MissingAsset(ISkyrimMajorRecordGetter record, string path)
         {
             Record = record;
-            Files = new List<string> { path };
+            Files = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { path };
         }
     }
 
     public class Finder
     {
         private readonly string _dataFolder;
-        private readonly List<string> _fileList;
+        private readonly HashSet<string> _fileSet;
         public readonly List<MissingAsset> MissingAssets;
 
         public Finder(string dataFolder)
         {
             _dataFolder = dataFolder;
-            _fileList = new List<string>();
+            _fileSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             MissingAssets = new List<MissingAsset>();
         }
 
@@ -54,12 +55,11 @@ namespace MissingAssetsFinder.Lib
                 var allowedFiles = reader.Files
                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x.Path)))
                     .Select(x => x.Path)
-                    .Select(x => x.ToLower())
-                    .Where(x => !_fileList.Contains(x))
+                    .Where(x => !_fileSet.Contains(x))
                     .ToList();
 
                 Utils.Log($"BSA {bsa} has {allowedFiles.Count} allowed files");
-                _fileList.AddRange(allowedFiles);
+                allowedFiles.Do(f => _fileSet.Add(f));
 
                 Utils.Log($"Finished parsing BSA {bsa}");
             });
@@ -76,25 +76,26 @@ namespace MissingAssetsFinder.Lib
                     .Where(x => AllowedExtensions.Contains(Path.GetExtension(x)))
                     .Select(x => x.Replace(_dataFolder, ""))
                     .Select(x => x.StartsWith("\\") ? x[1..] : x)
-                    .Select(x => x.ToLower())
-                    .Where(x => !_fileList.Contains(x))
+                    .Where(x => !_fileSet.Contains(x))
                     .ToList());
 
             Utils.Log($"Found {files.Count} loose files");
 
-            _fileList.AddRange(files);
+            files.Do(f => _fileSet.Add(f));
         }
 
         private bool CanAdd(string file)
         {
-            return !_fileList.Contains(file) && MissingAssets.All(x => !x.Files.Contains(file));
+            return !_fileSet.Contains(file) && MissingAssets.All(x => !x.Files.Contains(file));
         }
 
         private void TryAdd(ISkyrimMajorRecordGetter record, string file)
         {
-            file = file.ToLower();
             if (!CanAdd(file))
                 return;
+
+            // ToLower is just for clean visualization
+            file = file.ToLower();
 
             if (MissingAssets.Any(x => x.Record.Equals(record)))
             {
