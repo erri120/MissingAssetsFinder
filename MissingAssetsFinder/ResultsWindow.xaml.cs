@@ -7,7 +7,7 @@ namespace MissingAssetsFinder
 {
     public partial class ResultsWindow : IViewFor<ResultsWindowVM>
     {
-        public ResultsWindow(List<MissingAsset> missingAssets)
+        public ResultsWindow(IEnumerable<MissingAsset> missingAssets)
         {
             InitializeComponent();
             ViewModel = new ResultsWindowVM(missingAssets);

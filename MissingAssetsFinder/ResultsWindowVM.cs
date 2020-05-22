@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
+using DynamicData.Binding;
 using MissingAssetsFinder.Lib;
 
 namespace MissingAssetsFinder
 {
     public class ResultsWindowVM : ViewModel
     {
-        public List<MissingAsset> MissingAssets;
+        //public List<MissingAsset> MissingAssets;
 
-        public ResultsWindowVM(List<MissingAsset> missingAssets)
+        public ObservableCollectionExtended<MissingAsset> MissingAssets;
+
+        public ResultsWindowVM(IEnumerable<MissingAsset> missingAssets)
         {
-            MissingAssets = missingAssets;
+            MissingAssets = new ObservableCollectionExtended<MissingAsset>(missingAssets);
         }
     }
 }
