@@ -17,12 +17,12 @@ namespace MissingAssetsFinder.Lib
             Windows1252 = Encoding.GetEncoding(1252);
         }
 
-        private static readonly Subject<string> LoggerSubject = new Subject<string>();
-        public static IObservable<string> LogMessages => LoggerSubject;
+        private static readonly Subject<StatusMessage> LoggerSubject = new Subject<StatusMessage>();
+        public static IObservable<StatusMessage> LogMessages => LoggerSubject;
 
         public static void Log(string s)
         {
-            LoggerSubject.OnNext(s);
+            LoggerSubject.OnNext(new StatusMessage(s));
             Console.WriteLine(s);
         }
 

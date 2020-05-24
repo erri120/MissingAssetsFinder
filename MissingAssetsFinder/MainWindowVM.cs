@@ -32,7 +32,7 @@ namespace MissingAssetsFinder
         public ReactiveCommand<Unit, Unit> Start;
         public ReactiveCommand<Unit, Unit> ViewResults;
 
-        public ObservableCollectionExtended<string> Log { get; } = new ObservableCollectionExtended<string>();
+        public ObservableCollectionExtended<StatusMessage> Log { get; } = new ObservableCollectionExtended<StatusMessage>();
 
         public MainWindowVM(MainWindow mainWindow)
         {
