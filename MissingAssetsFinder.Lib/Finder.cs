@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MissingAssetsFinder.Lib.BSA;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 
 namespace MissingAssetsFinder.Lib
 {
@@ -90,13 +91,27 @@ namespace MissingAssetsFinder.Lib
             return !_fileSet.Contains(file) && MissingAssets.All(x => !x.Files.Contains(file));
         }
 
+        private static string ToDataString(string s)
+        {
+            if (s.StartsWith("\\"))
+                s = s.Substring(1, s.Length);
+
+            if (s.EndsWith(".nif"))
+                return $"meshes\\{s}";
+
+            if (s.EndsWith(".dds"))
+                return $"textures\\{s}";
+
+            return s;
+        }
+
         private void TryAdd(ISkyrimMajorRecordGetter record, string file)
         {
-            if (!CanAdd(file))
-                return;
-
             // ToLower is just for clean visualization
             file = file.ToLower();
+            file = ToDataString(file);
+            if (!CanAdd(file))
+                return;
 
             if (MissingAssets.Any(x => x.Record.Equals(record)))
             {
@@ -115,17 +130,18 @@ namespace MissingAssetsFinder.Lib
 
             Utils.Log($"Finished loading plugin {plugin}");
 
-            mod.Armors.Records
-                .Do(r =>
+            mod.Armors.Records.NotNull().Do(r =>
             {
-                if (r?.WorldModel?.Female?.Model != null && !r.WorldModel.Female.Model.File.IsEmpty())
+                var femaleFile = r.WorldModel?.Female?.Model?.File;
+                if (!femaleFile.IsEmpty())
                 {
-                    TryAdd(r, r.WorldModel.Female.Model.File);
+                    TryAdd(r, femaleFile!);
                 }
 
-                if (r?.WorldModel?.Male?.Model != null && !r.WorldModel.Male.Model.File.IsEmpty())
+                var maleFile = r.WorldModel?.Male?.Model?.File;
+                if (!maleFile.IsEmpty())
                 {
-                    TryAdd(r, r.WorldModel.Male.Model.File);
+                    TryAdd(r, maleFile!);
                 }
             });
 
