@@ -10,6 +10,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using MissingAssetsFinder.Lib;
+using Mutagen.Bethesda;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -109,6 +110,24 @@ namespace MissingAssetsFinder
                     (isWorking, missingArchivesCount) => !isWorking && missingArchivesCount > 0));
         }
 
+        public class FormKeyComparer : Comparer<FormKey>
+        {
+            public override int Compare(FormKey x, FormKey y)
+            {
+                if (string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal) != 0)
+                {
+                    return string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal);
+                }
+
+                if (x.ID.CompareTo(y.ID) != 0)
+                {
+                    return x.ID.CompareTo(y.ID);
+                }
+
+                return 0;
+            }
+        }
+
         public async Task FindMissingAssets(CancellationToken token)
         {
             IsWorking = true;
@@ -128,7 +147,7 @@ namespace MissingAssetsFinder
                 return finder.MissingAssets;
             }, token);
 
-            missingAssets.Sort((first, second) => (int)first.Record.FormKey.ID - (int)second.Record.FormKey.ID);
+            missingAssets.Sort((first, second) => new FormKeyComparer().Compare(first.Record.FormKey, second.Record.FormKey));
             MissingAssets = missingAssets;
 
             IsWorking = false;
