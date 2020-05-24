@@ -89,7 +89,8 @@ namespace MissingAssetsFinder
                     await writer.WriteLineAsync($"<li>Total missing files: {MissingAssets.Select(x => x.Files.Count).Aggregate((x, y) => x+y)}</li></ul></br>");
 
                     await writer.WriteLineAsync("<h2>Records:</h2></br>");
-                    await writer.WriteLineAsync("<table class=\"table\"><tbody><tr><th scope=\"col\">ID</th><th scope=\"col\">Files</th></tr>");
+                    await writer.WriteAsync("<input type=\"text\" class=\"form-control\" id=\"searchInput\" onkeyup=\"searchFunc()\" placeholder=\"Search for IDs...\"/>\n<script>\nfunction searchFunc(){const a=document.getElementById(\"searchInput\"),b=a.value.toUpperCase(),c=document.getElementById(\"table\"),d=c.getElementsByTagName(\"tr\");for(let a,c=0;c<d.length;c++){if(a=d[c].getElementsByTagName(\"td\")[0],!a)continue;let e=a.textContent||a.innerText;d[c].style.display=-1<e.toUpperCase().indexOf(b)?\"\":\"none\"}}\n</script>");
+                    await writer.WriteLineAsync("<table id=\"table\" class=\"table\"><tbody><tr><th scope=\"col\">ID</th><th scope=\"col\">Files</th></tr>");
 
                     MissingAssets.Do(a =>
                     {
