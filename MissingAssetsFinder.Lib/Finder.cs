@@ -38,7 +38,8 @@ namespace MissingAssetsFinder.Lib
         private static readonly List<string> AllowedExtensions = new List<string>
         {
             ".nif",
-            ".dds"
+            ".dds",
+            ".tri"
             //".hkx"
         };
 
@@ -96,7 +97,7 @@ namespace MissingAssetsFinder.Lib
             if (s.StartsWith("\\"))
                 s = s.Substring(1, s.Length);
 
-            if (s.EndsWith(".nif"))
+            if (s.EndsWith(".nif") || s.EndsWith(".tri"))
                 return $"meshes\\{s}";
 
             if (s.EndsWith(".dds"))
