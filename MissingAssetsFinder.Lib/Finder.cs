@@ -123,6 +123,37 @@ namespace MissingAssetsFinder.Lib
             MissingAssets.Add(new MissingAsset(record, file));
         }
 
+        private List<uint> KnownRaces = new List<uint>
+        {
+            0x13740, //ArgonianRace
+            0x13741, //BretonRace
+            0x13742, //DarkElfRace
+            0x13743, //HighElfRace
+            0x13744, //ImperialRace
+            0x13745, //KhajitRace
+            0x13746, //NordRace
+            0x13747, //OrcRace
+            0x13748, //ReguardRace
+            0x13749, //WoodElfRace
+
+            0x2C659, //ImperialRaceChild
+            0x2C65A, //RedguardRaceChild
+            0x2C65B, //NordRaceChild
+            0x2C65C, //BretonRaceChild
+            
+            //0x7EAF3, //NordRaceAstrid
+
+            0x88794, //NordRaceVampire
+            0x888CA, //ArgonianRaceVampire
+            0x8883C, //BretonRaceVampire
+            0x8883D, //DarkElfRaceVampire
+            0x88840, //HighElfRaceVampire
+            0x88844, //ImperialRaceVampire
+            0x88845, //KhajitRaceVampire
+            0x88846, //ReguardRaceVampire
+            0x88884, //WoodElfRaceVampire
+        };
+
         public void FindMissingAssets(string plugin)
         {
             Utils.Log($"Start finding missing assets for {plugin}");
@@ -218,10 +249,16 @@ namespace MissingAssetsFinder.Lib
             mod.Npcs.Records.Do(r =>
             {
                 if (r.TintLayers == null || r.TintLayers.Count == 0)
-                    return;
+                {
+                    if (!r.Race.TryResolve(new DirectModLinkCache<ISkyrimModDisposableGetter>(mod), out var race))
+                        return;
 
-                TryAdd(r, $"actors\\character\\facegendata\\facegeom\\{mod.ModKey.FileName}\\{r.FormKey.ID:x8}.nif");
-                TryAdd(r, $"actors\\character\\facegendata\\facetint\\{mod.ModKey.FileName}\\{r.FormKey.ID:x8}.dds");
+                    if (!KnownRaces.Contains(race.FormKey.ID))
+                        return;
+                }
+
+                TryAdd(r, $"actors\\character\\facegendata\\facegeom\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.nif");
+                TryAdd(r, $"actors\\character\\facegendata\\facetint\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.dds");
             });
 
             Utils.Log($"Finished finding missing assets. Found: {MissingAssets.Count} missing assets");
