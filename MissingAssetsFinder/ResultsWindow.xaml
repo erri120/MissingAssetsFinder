@@ -21,10 +21,12 @@
         <Grid Margin="16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Style="{DynamicResource MaterialDesignHeadline5TextBlock}">Results</TextBlock>
-            <TreeView x:Name="ResultTreeView" Grid.Row="1" materialDesign:RippleAssist.IsDisabled="True" VirtualizingStackPanel.IsVirtualizing="True">
+            <Button x:Name="ExportButton" Grid.Row="1">Export</Button>
+            <TreeView x:Name="ResultTreeView" Grid.Row="2" materialDesign:RippleAssist.IsDisabled="True" VirtualizingStackPanel.IsVirtualizing="True">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type lib:MissingAsset}">
                         <TreeViewItem Header="{Binding Record.FormKey}" ItemsSource="{Binding Files}" materialDesign:RippleAssist.IsDisabled="True">

@@ -10,11 +10,13 @@ namespace MissingAssetsFinder
         public ResultsWindow(IEnumerable<MissingAsset> missingAssets)
         {
             InitializeComponent();
-            ViewModel = new ResultsWindowVM(missingAssets);
+            ViewModel = new ResultsWindowVM(this, missingAssets);
 
             this.WhenActivated(disposable =>
             {
                 this.OneWayBind(ViewModel, x => x.MissingAssets, x => x.ResultTreeView.ItemsSource)
+                    .DisposeWith(disposable);
+                this.BindCommand(ViewModel, x => x.ExportCommand, x => x.ExportButton)
                     .DisposeWith(disposable);
             });
         }

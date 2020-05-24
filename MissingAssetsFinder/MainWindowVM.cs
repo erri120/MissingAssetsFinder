@@ -66,7 +66,7 @@ namespace MissingAssetsFinder
                     EnsurePathExists = true,
                     EnsureValidNames = true,
                 };
-                if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+                if (dialog.ShowDialog(_mainWindow) != CommonFileDialogResult.Ok) return;
                 Utils.Log($"Selected: {dialog.FileName}");
                 SelectedDataPath = dialog.FileName;
             }, this.WhenAny(x => x.IsWorking).Select(x => !x));
@@ -85,7 +85,7 @@ namespace MissingAssetsFinder
                 };
                 dialog.Filters.Add(new CommonFileDialogFilter("Plugin", ".esp"));
 
-                if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+                if (dialog.ShowDialog(_mainWindow) != CommonFileDialogResult.Ok) return;
                 Utils.Log($"Selected {dialog.FileNames.Count()} files");
                 SelectedPlugins = dialog.FileNames.ToList();
             }, this.WhenAny(x => x.IsWorking).Select(x => !x));
