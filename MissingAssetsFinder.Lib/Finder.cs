@@ -215,6 +215,15 @@ namespace MissingAssetsFinder.Lib
                 });
             });
 
+            mod.Npcs.Records.Do(r =>
+            {
+                if (r.TintLayers == null || r.TintLayers.Count == 0)
+                    return;
+
+                TryAdd(r, $"actors\\character\\facegendata\\facegeom\\{mod.ModKey.FileName}\\{r.FormKey.ID:x8}.nif");
+                TryAdd(r, $"actors\\character\\facegendata\\facetint\\{mod.ModKey.FileName}\\{r.FormKey.ID:x8}.dds");
+            });
+
             Utils.Log($"Finished finding missing assets. Found: {MissingAssets.Count} missing assets");
         }
     }

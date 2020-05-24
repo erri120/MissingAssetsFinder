@@ -13,3 +13,4 @@ This program finds missing assets in Bethesda Plugins. A cache of all files (fro
 - Weapon
 - Static
 - Head Part
+- NPC (for checking face gen data)
