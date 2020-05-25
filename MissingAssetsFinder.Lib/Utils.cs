@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Text;
+using JetBrains.Annotations;
 using MissingAssetsFinder.Lib.BSA;
 
 namespace MissingAssetsFinder.Lib
@@ -31,7 +32,7 @@ namespace MissingAssetsFinder.Lib
             return string.IsNullOrEmpty(s);
         }
 
-        public static void Do<T>(this IEnumerable<T> enumerable, Action<T> action)
+        public static void Do<T>(this IEnumerable<T> enumerable, [InstantHandle] Action<T> action)
         {
             foreach (var item in enumerable) action(item);
         }
