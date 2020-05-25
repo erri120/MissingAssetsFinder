@@ -13,6 +13,8 @@ namespace MissingAssetsFinder
 
             this.WhenActivated(disposable =>
             {
+                this.Bind(ViewModel, x => x.UseLoadOrder, x => x.UseLoadOrderCheckBox.IsChecked)
+                    .DisposeWith(disposable);
                 this.OneWayBind(ViewModel, x => x.Log, x => x.LogListBox.ItemsSource)
                     .DisposeWith(disposable);
                 this.OneWayBind(ViewModel, x => x.SelectedDataPath, x => x.DataFolderTextBox.Text)

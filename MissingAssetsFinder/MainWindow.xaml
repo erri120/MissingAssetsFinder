@@ -22,7 +22,7 @@
         <Grid Margin="16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto" MaxHeight="300"/>
+                <RowDefinition Height="Auto" MaxHeight="100"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -34,11 +34,12 @@
                 <Label>Data Folder:</Label>
                 <TextBox x:Name="DataFolderTextBox" IsReadOnly="True"/>
 
-                <Button x:Name="SelectPluginButton" Margin="0 12 0 12">Select Plugins</Button>
+                <CheckBox x:Name="UseLoadOrderCheckBox" Margin="0 12 0 0">Use Load Order</CheckBox>
+                <Button x:Name="SelectPluginButton" Margin="0 6 0 6">Select Plugins</Button>
                 <Label>Selected Plugins:</Label>
             </StackPanel>
 
-            <ListBox x:Name="PluginsListBox" Grid.Row="1" materialDesign:RippleAssist.IsDisabled="True">
+            <ListBox x:Name="PluginsListBox" Grid.Row="1" materialDesign:RippleAssist.IsDisabled="True" local:AutoScrollBehavior.ScrollOnNewItem="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding}" TextWrapping="WrapWithOverflow" materialDesign:RippleAssist.IsDisabled="True"/>

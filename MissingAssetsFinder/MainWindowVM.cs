@@ -28,6 +28,8 @@ namespace MissingAssetsFinder
 
         [Reactive] public List<MissingAsset> MissingAssets { get; set; }
 
+        [Reactive] public bool UseLoadOrder { get; set; }
+
         public ReactiveCommand<Unit, Unit> SelectDataFolder;
         public ReactiveCommand<Unit, Unit> SelectPlugins;
         public ReactiveCommand<Unit, Unit> Start;
@@ -89,13 +91,14 @@ namespace MissingAssetsFinder
                 if (dialog.ShowDialog(_mainWindow) != CommonFileDialogResult.Ok) return;
                 Utils.Log($"Selected {dialog.FileNames.Count()} files");
                 SelectedPlugins = dialog.FileNames.ToList();
-            }, this.WhenAny(x => x.IsWorking).Select(x => !x));
+            }, this.WhenAny(x => x.IsWorking).CombineLatest(this.WhenAny(x => x.UseLoadOrder), (isWorking, useLoadOrder) => !isWorking && !useLoadOrder));
 
             Start = ReactiveCommand.CreateFromTask(FindMissingAssets,
                 this.WhenAny(x => x.IsWorking).CombineLatest(
                     this.WhenAny(x => x.SelectedDataPath).Select(x => x.IsEmpty()),
                     this.WhenAny(x => x.SelectedPlugins).Select(x => x.All(y => y.IsEmpty())),
-                    (isWorking, dataPathEmpty, pluginPathEmpty) => !isWorking && !dataPathEmpty && !pluginPathEmpty));
+                        this.WhenAny(x => x.UseLoadOrder),
+                    (isWorking, dataPathEmpty, pluginPathEmpty, useLoadOrder) => !isWorking && !dataPathEmpty && (!pluginPathEmpty || useLoadOrder)));
 
             ViewResults = ReactiveCommand.Create(() =>
                 {
@@ -134,15 +137,18 @@ namespace MissingAssetsFinder
 
             var missingAssets = await Task.Run(async () =>
             {
-                var finder = new Finder(SelectedDataPath);
+                using var finder = new Finder(SelectedDataPath);
 
                 await finder.BuildBSACacheAsync();
                 await finder.BuildLooseFileCacheAsync();
 
-                SelectedPlugins.Do(s =>
-                {
-                    finder.FindMissingAssets(s);
-                });
+                if(UseLoadOrder) 
+                    finder.FindMissingAssets(UseLoadOrder);
+                else
+                    SelectedPlugins.Do(s =>
+                    {
+                        finder.FindMissingAssets(s);
+                    });
 
                 return finder.MissingAssets;
             }, token);

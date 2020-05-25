@@ -22,17 +22,19 @@ namespace MissingAssetsFinder.Lib
         }
     }
 
-    public class Finder
+    public class Finder : IDisposable
     {
         private readonly string _dataFolder;
         private readonly HashSet<string> _fileSet;
         public readonly List<MissingAsset> MissingAssets;
+        private LoadOrder<ISkyrimModDisposableGetter> _loadOrder;
 
         public Finder(string dataFolder)
         {
             _dataFolder = dataFolder;
             _fileSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             MissingAssets = new List<MissingAsset>();
+            _loadOrder = new LoadOrder<ISkyrimModDisposableGetter>();
         }
 
         private static readonly List<string> AllowedExtensions = new List<string>
@@ -161,6 +163,26 @@ namespace MissingAssetsFinder.Lib
             0x7 //Player
         };
 
+        public void FindMissingAssets(bool useLoadOrder)
+        {
+            if (!useLoadOrder)
+                return;
+
+            var path = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData") ?? string.Empty,
+                "Skyrim Special Edition", "Plugins.txt");
+            var mods = LoadOrder.ProcessLoadOrder(path);
+            var modList = LoadOrder.AlignLoadOrder(mods, _dataFolder);
+            _loadOrder.Import(_dataFolder, modList,
+                (FilePath filePath, ModKey key, out ISkyrimModDisposableGetter getter) =>
+                {
+                    getter = SkyrimMod.CreateFromBinaryOverlay(filePath.Path, key);
+                    return true;
+                });
+
+            var linkCache = _loadOrder.CreateLinkCache();
+            _loadOrder.Select(x => x.Mod).NotNull().Do(mod => FindMissingAssets(mod, linkCache));
+        }
+
         public void FindMissingAssets(string plugin)
         {
             Utils.Log($"Start finding missing assets for {plugin}");
@@ -169,6 +191,11 @@ namespace MissingAssetsFinder.Lib
 
             Utils.Log($"Finished loading plugin {plugin}");
 
+            FindMissingAssets(mod);
+        }
+
+        public void FindMissingAssets(ISkyrimModDisposableGetter mod, ILinkCache? linkCache = null)
+        {
             mod.Armors.Records.NotNull().Do(r =>
             {
                 var femaleFile = r.WorldModel?.Female?.Model?.File;
@@ -230,9 +257,9 @@ namespace MissingAssetsFinder.Lib
             mod.Weapons.Records
                 .Where(r => r.Model != null)
                 .Do(r =>
-            {
-                TryAdd(r, r.Model!.File);
-            });
+                {
+                    TryAdd(r, r.Model!.File);
+                });
 
             mod.Statics.Records
                 .Where(r => r.Model != null).Do(r =>
@@ -242,15 +269,15 @@ namespace MissingAssetsFinder.Lib
 
             mod.HeadParts.Records.Do(r =>
             {
-                if(r.Model != null)
+                if (r.Model != null)
                     TryAdd(r, r.Model.File);
 
                 r.Parts
                     .Where(p => !p.FileName.IsEmpty())
                     .Do(p =>
-                {
-                    TryAdd(r, p.FileName!);
-                });
+                    {
+                        TryAdd(r, p.FileName!);
+                    });
             });
 
             mod.Npcs.Records.Do(r =>
@@ -258,32 +285,34 @@ namespace MissingAssetsFinder.Lib
                 if (r.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
                     return;
 
-                if (r.Race.TryResolve(mod.CreateLinkCache(), out var race))
+                if (r.TintLayers == null || r.TintLayers.Count == 0)
                 {
-                    if (!race.Flags.HasFlag(Race.Flag.FaceGenHead))
-                        return;
+                    if (r.Race.TryResolve(linkCache ?? mod.CreateLinkCache(), out var race))
+                    {
+                        if (!race.Flags.HasFlag(Race.Flag.FaceGenHead))
+                            return;
+                    }
+                    else
+                    {
+                        Utils.Log(r.Race.TryGetModKey(out var modKey)
+                            ? $"Unable to resolve race {r.Race.FormKey} from {modKey} of NPC_ {r.FormKey} from {mod.ModKey}"
+                            : $"Unable to resolve race {r.Race.FormKey} of NPC_ {r.FormKey} from {mod.ModKey}");
+                    }
                 }
-                else
-                {
-                    Utils.Log(r.Race.TryGetModKey(out var modKey)
-                        ? $"Unable to resolve race {r.Race.FormKey} from {modKey} of NPC_ {r.FormKey} from {mod.ModKey}"
-                        : $"Unable to resolve race {r.Race.FormKey} of NPC_ {r.FormKey} from {mod.ModKey}");
-                }
-
-                /*if (r.TintLayers == null || r.TintLayers.Count == 0)
-                {
-                    if (!r.Race.TryResolve(new DirectModLinkCache<ISkyrimModDisposableGetter>(mod), out var race))
-                        return;
-
-                    if (!KnownRaces.Contains(race.FormKey.ID))
-                        return;
-                }*/
 
                 TryAdd(r, $"actors\\character\\facegendata\\facegeom\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.nif");
                 TryAdd(r, $"actors\\character\\facegendata\\facetint\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.dds");
             });
 
-            Utils.Log($"Finished finding missing assets. Found: {MissingAssets.Count} missing assets");
+            Utils.Log($"Finished finding missing assets for {mod.ModKey}. Found: {MissingAssets.Count} missing assets");
+        }
+
+        public void Dispose()
+        {
+            _loadOrder.Select(x => x.Mod).NotNull().Do(x =>
+            {
+                x.Dispose();
+            });
         }
     }
 }
