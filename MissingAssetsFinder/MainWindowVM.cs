@@ -113,55 +113,39 @@ namespace MissingAssetsFinder
                     (isWorking, missingArchivesCount) => !isWorking && missingArchivesCount > 0));
         }
 
-        public class FormKeyComparer : Comparer<FormKey>
-        {
-            public override int Compare(FormKey x, FormKey y)
-            {
-                if (string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal) != 0)
-                {
-                    return string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal);
-                }
-
-                if (x.ID.CompareTo(y.ID) != 0)
-                {
-                    return x.ID.CompareTo(y.ID);
-                }
-
-                return 0;
-            }
-        }
-
         public async Task FindMissingAssets(CancellationToken token)
         {
             IsWorking = true;
-
-            var missingAssets = await Task.Run(async () =>
+            try
             {
-                using var finder = new Finder(SelectedDataPath);
+                var missingAssets = await Task.Run(async () =>
+                {
+                    using var finder = new Finder(SelectedDataPath);
 
-                await finder.BuildBSACacheAsync();
-                await finder.BuildLooseFileCacheAsync();
+                    await finder.BuildBSACacheAsync();
+                    await finder.BuildLooseFileCacheAsync();
 
-                if(UseLoadOrder) 
-                    finder.FindMissingAssets(UseLoadOrder);
-                else
-                    SelectedPlugins.Do(s =>
-                    {
-                        finder.FindMissingAssets(s);
-                    });
+                    if (UseLoadOrder)
+                        finder.FindMissingAssets(UseLoadOrder);
+                    else
+                        SelectedPlugins.Do(s => { finder.FindMissingAssets(s); });
 
-                return finder.MissingAssets;
-            }, token);
+                    return finder.MissingAssets;
+                }, token);
 
-            missingAssets.Sort((first, second) => new FormKeyComparer().Compare(first.Record.FormKey, second.Record.FormKey));
-            MissingAssets = missingAssets;
-
-            IsWorking = false;
-
-            /*missingAssets.Do(a =>
+                if(!UseLoadOrder) 
+                    missingAssets.Sort((first, second) =>
+                    new Finder.FormKeyComparer().Compare(first.Record.FormKey, second.Record.FormKey));
+                MissingAssets = missingAssets;
+            }
+            catch (Exception e)
             {
-                Utils.Log($"{a.Record.FormKey} is missing {a.Files.Aggregate((x,y) => $"{x},{y}")}");
-            });*/
+                Utils.Log($"Exception: {e}");
+            }
+            finally
+            {
+                IsWorking = false;
+            }
         }
     }
 }

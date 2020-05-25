@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MissingAssetsFinder.Lib.BSA;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
@@ -163,24 +164,64 @@ namespace MissingAssetsFinder.Lib
             0x7 //Player
         };
 
+        public class FormKeyComparer : Comparer<FormKey>
+        {
+            public int Compare(FormKey x, FormKey y, LoadOrder<ISkyrimModDisposableGetter> loadOrder)
+            {
+                if (!loadOrder.TryGetListing(x.ModKey,
+                    out (LoadOrderIndex Index, ModListing<ISkyrimModDisposableGetter> Listing) resultX))
+                    return Compare(x, y);
+
+                if (!loadOrder.TryGetListing(y.ModKey,
+                    out (LoadOrderIndex Index, ModListing<ISkyrimModDisposableGetter> Listing) resultY))
+                    return Compare(x, y);
+
+                if (resultX.Index.ID.CompareTo(resultY.Index.ID) != 0)
+                    return resultX.Index.ID.CompareTo(resultY.Index.ID);
+
+                return Compare(x, y);
+            }
+
+            public override int Compare(FormKey x, FormKey y)
+            {
+
+                if (string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal) != 0)
+                {
+                    return string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal);
+                }
+
+                if (x.ID.CompareTo(y.ID) != 0)
+                {
+                    return x.ID.CompareTo(y.ID);
+                }
+
+                return 0;
+            }
+        }
+
         public void FindMissingAssets(bool useLoadOrder)
         {
             if (!useLoadOrder)
                 return;
 
             var path = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData") ?? string.Empty,
-                "Skyrim Special Edition", "Plugins.txt");
+                "Skyrim Special Edition", "loadorder.txt");
+            Utils.Log($"Using loadorder.txt at {path}");
             var mods = LoadOrder.ProcessLoadOrder(path);
-            var modList = LoadOrder.AlignLoadOrder(mods, _dataFolder);
-            _loadOrder.Import(_dataFolder, modList,
+            //var modList = LoadOrder.AlignLoadOrder(mods, _dataFolder);
+            _loadOrder.Import(_dataFolder, mods,
                 (FilePath filePath, ModKey key, out ISkyrimModDisposableGetter getter) =>
                 {
+                    Utils.Log($"Creating Binary Overlay for {filePath}");
                     getter = SkyrimMod.CreateFromBinaryOverlay(filePath.Path, key);
                     return true;
                 });
 
             var linkCache = _loadOrder.CreateLinkCache();
             _loadOrder.Select(x => x.Mod).NotNull().Do(mod => FindMissingAssets(mod, linkCache));
+            Utils.Log($"Finished finding missing assets for {mods.Count} mods");
+
+            MissingAssets.Sort((x, y) => new FormKeyComparer().Compare(x.Record.FormKey, y.Record.FormKey, _loadOrder));
         }
 
         public void FindMissingAssets(string plugin)
