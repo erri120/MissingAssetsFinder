@@ -108,6 +108,8 @@ namespace MissingAssetsFinder.Lib
 
         private void TryAdd(ISkyrimMajorRecordGetter record, string file)
         {
+            if (_blackList.Contains(record.FormKey.ID))
+                return;
             // ToLower is just for clean visualization
             file = file.ToLower();
             file = ToDataString(file);
@@ -123,7 +125,7 @@ namespace MissingAssetsFinder.Lib
             MissingAssets.Add(new MissingAsset(record, file));
         }
 
-        private List<uint> KnownRaces = new List<uint>
+        /*private List<uint> KnownRaces = new List<uint>
         {
             0x13740, //ArgonianRace
             0x13741, //BretonRace
@@ -152,6 +154,11 @@ namespace MissingAssetsFinder.Lib
             0x88845, //KhajitRaceVampire
             0x88846, //ReguardRaceVampire
             0x88884, //WoodElfRaceVampire
+        };*/
+
+        private readonly List<uint> _blackList = new List<uint>
+        {
+            0x7 //Player
         };
 
         public void FindMissingAssets(string plugin)
@@ -248,14 +255,29 @@ namespace MissingAssetsFinder.Lib
 
             mod.Npcs.Records.Do(r =>
             {
-                if (r.TintLayers == null || r.TintLayers.Count == 0)
+                if (r.Configuration.Flags.HasFlag(NpcConfiguration.Flag.IsCharGenFacePreset))
+                    return;
+
+                if (r.Race.TryResolve(mod.CreateLinkCache(), out var race))
+                {
+                    if (!race.Flags.HasFlag(Race.Flag.FaceGenHead))
+                        return;
+                }
+                else
+                {
+                    Utils.Log(r.Race.TryGetModKey(out var modKey)
+                        ? $"Unable to resolve race {r.Race.FormKey} from {modKey} of NPC_ {r.FormKey} from {mod.ModKey}"
+                        : $"Unable to resolve race {r.Race.FormKey} of NPC_ {r.FormKey} from {mod.ModKey}");
+                }
+
+                /*if (r.TintLayers == null || r.TintLayers.Count == 0)
                 {
                     if (!r.Race.TryResolve(new DirectModLinkCache<ISkyrimModDisposableGetter>(mod), out var race))
                         return;
 
                     if (!KnownRaces.Contains(race.FormKey.ID))
                         return;
-                }
+                }*/
 
                 TryAdd(r, $"actors\\character\\facegendata\\facegeom\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.nif");
                 TryAdd(r, $"actors\\character\\facegendata\\facetint\\{r.FormKey.ModKey.FileName}\\{r.FormKey.ID:x8}.dds");
