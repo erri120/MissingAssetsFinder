@@ -84,7 +84,7 @@ namespace MissingAssetsFinder
                     EnsurePathExists = true,
                     EnsureValidNames = true,
                 };
-                dialog.Filters.Add(new CommonFileDialogFilter("Plugin", ".esp"));
+                dialog.Filters.Add(new CommonFileDialogFilter("Plugin", ".esm,.esp"));
 
                 if (dialog.ShowDialog(_mainWindow) != CommonFileDialogResult.Ok) return;
                 Utils.Log($"Selected {dialog.FileNames.Count()} files");
