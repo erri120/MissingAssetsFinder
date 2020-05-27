@@ -28,7 +28,9 @@ namespace MissingAssetsFinder.Lib
         private readonly string _dataFolder;
         private readonly HashSet<string> _fileSet;
         public readonly List<MissingAsset> MissingAssets;
-        private LoadOrder<ISkyrimModDisposableGetter> _loadOrder;
+        private readonly LoadOrder<ISkyrimModDisposableGetter> _loadOrder;
+
+        public bool DoRaceCheck { get; set; }
 
         public Finder(string dataFolder)
         {
@@ -328,6 +330,9 @@ namespace MissingAssetsFinder.Lib
 
                 if (r.TintLayers == null || r.TintLayers.Count == 0)
                 {
+                    if (!DoRaceCheck)
+                        return;
+
                     if (r.Race.TryResolve(linkCache ?? mod.CreateLinkCache(), out var race))
                     {
                         if (!race.Flags.HasFlag(Race.Flag.FaceGenHead))
