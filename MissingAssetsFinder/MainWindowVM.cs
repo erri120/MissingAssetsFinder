@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -135,7 +135,7 @@ namespace MissingAssetsFinder
 
                 if(!UseLoadOrder) 
                     missingAssets.Sort((first, second) =>
-                    new Finder.FormKeyComparer().Compare(first.Record.FormKey, second.Record.FormKey));
+                        FormKey.AlphabeticalComparer().Compare(first.Record.FormKey, second.Record.FormKey));
                 MissingAssets = missingAssets;
             }
             catch (Exception e)

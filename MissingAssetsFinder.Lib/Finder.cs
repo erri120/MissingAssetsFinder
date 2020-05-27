@@ -164,41 +164,6 @@ namespace MissingAssetsFinder.Lib
             0x7 //Player
         };
 
-        public class FormKeyComparer : Comparer<FormKey>
-        {
-            public int Compare(FormKey x, FormKey y, LoadOrder<ISkyrimModDisposableGetter> loadOrder)
-            {
-                if (!loadOrder.TryGetListing(x.ModKey,
-                    out (LoadOrderIndex Index, ModListing<ISkyrimModDisposableGetter> Listing) resultX))
-                    return Compare(x, y);
-
-                if (!loadOrder.TryGetListing(y.ModKey,
-                    out (LoadOrderIndex Index, ModListing<ISkyrimModDisposableGetter> Listing) resultY))
-                    return Compare(x, y);
-
-                if (resultX.Index.ID.CompareTo(resultY.Index.ID) != 0)
-                    return resultX.Index.ID.CompareTo(resultY.Index.ID);
-
-                return Compare(x, y);
-            }
-
-            public override int Compare(FormKey x, FormKey y)
-            {
-
-                if (string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal) != 0)
-                {
-                    return string.Compare(x.ModKey.FileName, y.ModKey.FileName, StringComparison.Ordinal);
-                }
-
-                if (x.ID.CompareTo(y.ID) != 0)
-                {
-                    return x.ID.CompareTo(y.ID);
-                }
-
-                return 0;
-            }
-        }
-
         public void FindMissingAssets(bool useLoadOrder)
         {
             if (!useLoadOrder)
@@ -221,7 +186,7 @@ namespace MissingAssetsFinder.Lib
             _loadOrder.Select(x => x.Mod).NotNull().Do(mod => FindMissingAssets(mod, linkCache));
             Utils.Log($"Finished finding missing assets for {mods.Count} mods");
 
-            MissingAssets.Sort((x, y) => new FormKeyComparer().Compare(x.Record.FormKey, y.Record.FormKey, _loadOrder));
+            MissingAssets.Sort((x, y) => FormKey.LoadOrderComparer(_loadOrder).Compare(x.Record.FormKey, y.Record.FormKey));
         }
 
         public void FindMissingAssets(string plugin)
