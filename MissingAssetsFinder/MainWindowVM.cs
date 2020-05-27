@@ -120,7 +120,7 @@ namespace MissingAssetsFinder
             {
                 var missingAssets = await Task.Run(async () =>
                 {
-                    using var finder = new Finder(SelectedDataPath);
+                    var finder = new Finder(SelectedDataPath);
 
                     await finder.BuildBSACacheAsync();
                     await finder.BuildLooseFileCacheAsync();

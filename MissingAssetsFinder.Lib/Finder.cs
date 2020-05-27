@@ -23,19 +23,17 @@ namespace MissingAssetsFinder.Lib
         }
     }
 
-    public class Finder : IDisposable
+    public class Finder
     {
         private readonly string _dataFolder;
         private readonly HashSet<string> _fileSet;
         public readonly List<MissingAsset> MissingAssets;
-        private LoadOrder<ISkyrimModDisposableGetter> _loadOrder;
 
         public Finder(string dataFolder)
         {
             _dataFolder = dataFolder;
             _fileSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             MissingAssets = new List<MissingAsset>();
-            _loadOrder = new LoadOrder<ISkyrimModDisposableGetter>();
         }
 
         private static readonly List<string> AllowedExtensions = new List<string>
@@ -173,20 +171,9 @@ namespace MissingAssetsFinder.Lib
                 "Skyrim Special Edition", "loadorder.txt");
             Utils.Log($"Using loadorder.txt at {path}");
             var mods = LoadOrder.ProcessLoadOrder(path);
-            //var modList = LoadOrder.AlignLoadOrder(mods, _dataFolder);
-            _loadOrder.Import(_dataFolder, mods,
-                (FilePath filePath, ModKey key, out ISkyrimModDisposableGetter getter) =>
-                {
-                    Utils.Log($"Creating Binary Overlay for {filePath}");
-                    getter = SkyrimMod.CreateFromBinaryOverlay(filePath.Path, key);
-                    return true;
-                });
-
-            var linkCache = _loadOrder.CreateLinkCache();
-            _loadOrder.Select(x => x.Mod).NotNull().Do(mod => FindMissingAssets(mod, linkCache));
             Utils.Log($"Finished finding missing assets for {mods.Count} mods");
 
-            MissingAssets.Sort((x, y) => FormKey.LoadOrderComparer(_loadOrder).Compare(x.Record.FormKey, y.Record.FormKey));
+            MissingAssets.Sort((x, y) => FormKey.LoadOrderComparer(mods).Compare(x.Record.FormKey, y.Record.FormKey));
         }
 
         public void FindMissingAssets(string plugin)
@@ -311,14 +298,6 @@ namespace MissingAssetsFinder.Lib
             });
 
             Utils.Log($"Finished finding missing assets for {mod.ModKey}. Found: {MissingAssets.Count} missing assets");
-        }
-
-        public void Dispose()
-        {
-            _loadOrder.Select(x => x.Mod).NotNull().Do(x =>
-            {
-                x.Dispose();
-            });
         }
     }
 }
