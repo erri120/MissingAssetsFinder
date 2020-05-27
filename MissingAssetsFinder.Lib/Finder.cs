@@ -107,8 +107,9 @@ namespace MissingAssetsFinder.Lib
             return s;
         }
 
-        private void TryAdd(ISkyrimMajorRecordGetter record, string file)
+        private void TryAdd(ISkyrimMajorRecordGetter record, string? file)
         {
+            if (file == null) return;
             if (_blackList.Contains(record.FormKey.ID))
                 return;
             // ToLower is just for clean visualization
@@ -191,85 +192,42 @@ namespace MissingAssetsFinder.Lib
         {
             mod.Armors.Records.NotNull().Do(r =>
             {
-                var femaleFile = r.WorldModel?.Female?.Model?.File;
-                if (!femaleFile.IsEmpty())
-                {
-                    TryAdd(r, femaleFile!);
-                }
-
-                var maleFile = r.WorldModel?.Male?.Model?.File;
-                if (!maleFile.IsEmpty())
-                {
-                    TryAdd(r, maleFile!);
-                }
+                TryAdd(r, r.WorldModel?.Female?.Model?.File);
+                TryAdd(r, r.WorldModel?.Male?.Model?.File);
             });
 
             mod.TextureSets.Records.Do(r =>
             {
-                if (!r.Diffuse.IsEmpty())
-                {
-                    TryAdd(r, r.Diffuse!);
-                }
-
-                if (!r.NormalOrGloss.IsEmpty())
-                {
-                    TryAdd(r, r.NormalOrGloss!);
-                }
-
-                if (!r.EnvironmentMaskOrSubsurfaceTint.IsEmpty())
-                {
-                    TryAdd(r, r.EnvironmentMaskOrSubsurfaceTint!);
-                }
-
-                if (!r.GlowOrDetailMap.IsEmpty())
-                {
-                    TryAdd(r, r.GlowOrDetailMap!);
-                }
-
-                if (!r.Height.IsEmpty())
-                {
-                    TryAdd(r, r.Height!);
-                }
-
-                if (!r.Environment.IsEmpty())
-                {
-                    TryAdd(r, r.Environment!);
-                }
-
-                if (!r.Multilayer.IsEmpty())
-                {
-                    TryAdd(r, r.Multilayer!);
-                }
-
-                if (!r.BacklightMaskOrSpecular.IsEmpty())
-                {
-                    TryAdd(r, r.BacklightMaskOrSpecular!);
-                }
+                TryAdd(r, r.Diffuse);
+                TryAdd(r, r.NormalOrGloss);
+                TryAdd(r, r.EnvironmentMaskOrSubsurfaceTint);
+                TryAdd(r, r.GlowOrDetailMap);
+                TryAdd(r, r.Height);
+                TryAdd(r, r.Environment);
+                TryAdd(r, r.Multilayer);
+                TryAdd(r, r.BacklightMaskOrSpecular);
             });
 
             mod.Weapons.Records
-                .Where(r => r.Model != null)
                 .Do(r =>
                 {
-                    TryAdd(r, r.Model!.File);
+                    TryAdd(r, r.Model?.File);
                 });
 
             mod.Statics.Records
-                .Where(r => r.Model != null).Do(r =>
+                .Do(r =>
                 {
-                    TryAdd(r, r.Model!.File);
+                    TryAdd(r, r.Model?.File);
                 });
 
             mod.HeadParts.Records.Do(r =>
             {
-                if (r.Model != null)
-                    TryAdd(r, r.Model.File);
+                TryAdd(r, r.Model?.File);
 
                 r.Parts
-                    .Where(p => !p.FileName.IsEmpty())
                     .Do(p =>
                     {
-                        TryAdd(r, p.FileName!);
+                        TryAdd(r, p.FileName);
                     });
             });
 
